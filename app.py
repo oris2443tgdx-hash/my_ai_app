@@ -1,14 +1,20 @@
-# tkinter is Python's built-in tool for making windows; "as tk" is a short name for it
+# bring in tkinter, python's tool for making windows
 import tkinter as tk
 
-# create the main window and call it root
+# create the main window
 root = tk.Tk()
+
+# set the text at the top of the window
+root.title("My AI App")
+
+# set the window size: 600 wide, 400 tall
 root.geometry("600x400")
 
-# put the text "My AI App" at the top of the window
-#root.title("My AI App")
+# create the text label
+label = tk.Label(root, text="Hello, I am your AI assistant")
+
+# place the label inside the window
+label.pack()
 
 # keep the window open and waiting for me
-#label = tk.Label(root, text="Hello, I am your AI assistant")
-#label.pack()
 root.mainloop()
