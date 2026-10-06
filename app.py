@@ -39,6 +39,9 @@ chat = tk.Text(root, height=12, width=70)
 # place the chat area in the window
 chat.pack()
 
+# lock the chat area so I cannot type in it by mistake
+chat.config(state="disabled")
+
 # create the text box where I type my message
 entry = tk.Entry(root, width=50)
 
@@ -47,11 +50,15 @@ entry.pack()
 
 # this function runs when I click Send or press Enter
 def send_message(event=None):
-    text = entry.get()
+    text = entry.get().strip()
+    if text == "":
+        return
+    chat.config(state="normal")
     chat.insert(tk.END, "You: " + text + "\n")
     reply = ask_ollama(text)
     chat.insert(tk.END, "AI: " + reply + "\n\n")
     chat.see(tk.END)
+    chat.config(state="disabled")
     entry.delete(0, tk.END)
 
 # pressing the Enter key also runs the function
