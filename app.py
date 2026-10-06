@@ -22,8 +22,13 @@ entry = tk.Entry(root, width=50)
 # place the text box in the window
 entry.pack()
 
-# create the Send button
-button = tk.Button(root, text="Send")
+# this function runs every time the Send button is clicked
+def send_message():
+    text = entry.get()
+    print("You typed:", text)
+
+# create the Send button and connect it to the function
+button = tk.Button(root, text="Send", command=send_message)
 
 # place the button in the window
 button.pack()
