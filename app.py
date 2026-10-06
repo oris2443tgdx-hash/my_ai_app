@@ -1,6 +1,23 @@
 # bring in tkinter, python's tool for making windows
 import tkinter as tk
 
+# bring in tools for talking to Ollama over the local network
+import json
+import urllib.request
+
+# the address of Ollama on my PC, and the model I have installed
+OLLAMA_URL = "http://localhost:11434/api/chat"
+MODEL = "llama3.2:1b"
+
+# this function sends a question to Ollama and returns its answer
+def ask_ollama(question):
+    body = {"model": MODEL, "messages": [{"role": "user", "content": question}], "stream": False}
+    data = json.dumps(body).encode("utf-8")
+    request = urllib.request.Request(OLLAMA_URL, data=data, headers={"Content-Type": "application/json"})
+    with urllib.request.urlopen(request) as response:
+        reply = json.loads(response.read().decode("utf-8"))
+    return reply["message"]["content"]
+
 # create the main window
 root = tk.Tk()
 
@@ -32,7 +49,8 @@ entry.pack()
 def send_message(event=None):
     text = entry.get()
     chat.insert(tk.END, "You: " + text + "\n")
-    chat.insert(tk.END, "AI: I received your message.\n\n")
+    reply = ask_ollama(text)
+    chat.insert(tk.END, "AI: " + reply + "\n\n")
     chat.see(tk.END)
     entry.delete(0, tk.END)
 
