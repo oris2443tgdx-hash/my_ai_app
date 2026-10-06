@@ -53,7 +53,10 @@ entry.pack()
 
 # this function runs in the second thread and waits for the AI
 def get_answer(text):
-    reply = ask_ollama(text)
+    try:
+        reply = ask_ollama(text)
+    except Exception as error:
+        reply = "Sorry, I could not get an answer. Is Ollama running? (" + str(error) + ")"
     root.after(0, show_reply, reply)
 
 # this function shows the AI's answer in the chat area
