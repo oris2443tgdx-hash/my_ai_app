@@ -5,6 +5,9 @@ import tkinter as tk
 import json
 import urllib.request
 
+# bring in the tool for running work in a second thread
+import threading
+
 # the address of Ollama on my PC, and the model I have installed
 OLLAMA_URL = "http://localhost:11434/api/chat"
 MODEL = "llama3.2:1b"
@@ -48,6 +51,19 @@ entry = tk.Entry(root, width=50)
 # place the text box in the window
 entry.pack()
 
+# this function runs in the second thread and waits for the AI
+def get_answer(text):
+    reply = ask_ollama(text)
+    root.after(0, show_reply, reply)
+
+# this function shows the AI's answer in the chat area
+def show_reply(reply):
+    chat.config(state="normal")
+    chat.insert(tk.END, "AI: " + reply + "\n\n")
+    chat.see(tk.END)
+    chat.config(state="disabled")
+    button.config(state="normal", text="Send")
+
 # this function runs when I click Send or press Enter
 def send_message(event=None):
     text = entry.get().strip()
@@ -55,11 +71,10 @@ def send_message(event=None):
         return
     chat.config(state="normal")
     chat.insert(tk.END, "You: " + text + "\n")
-    reply = ask_ollama(text)
-    chat.insert(tk.END, "AI: " + reply + "\n\n")
-    chat.see(tk.END)
     chat.config(state="disabled")
     entry.delete(0, tk.END)
+    button.config(state="disabled", text="Thinking...")
+    threading.Thread(target=get_answer, args=(text,), daemon=True).start()
 
 # pressing the Enter key also runs the function
 entry.bind("<Return>", send_message)
