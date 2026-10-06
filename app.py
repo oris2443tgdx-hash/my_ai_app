@@ -28,11 +28,16 @@ entry = tk.Entry(root, width=50)
 # place the text box in the window
 entry.pack()
 
-# this function runs every time the Send button is clicked
-def send_message():
+# this function runs when I click Send or press Enter
+def send_message(event=None):
     text = entry.get()
     chat.insert(tk.END, "You: " + text + "\n")
+    chat.insert(tk.END, "AI: I received your message.\n\n")
+    chat.see(tk.END)
     entry.delete(0, tk.END)
+
+# pressing the Enter key also runs the function
+entry.bind("<Return>", send_message)
 
 # create the Send button and connect it to the function
 button = tk.Button(root, text="Send", command=send_message)
