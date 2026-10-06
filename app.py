@@ -16,5 +16,17 @@ label = tk.Label(root, text="Hello, I am your AI assistant")
 # place the label inside the window
 label.pack()
 
+# create the text box where I type my message
+entry = tk.Entry(root, width=50)
+
+# place the text box in the window
+entry.pack()
+
+# create the Send button
+button = tk.Button(root, text="Send")
+
+# place the button in the window
+button.pack()
+
 # keep the window open and waiting for me
 root.mainloop()
