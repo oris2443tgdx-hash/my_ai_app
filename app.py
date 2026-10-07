@@ -39,11 +39,11 @@ label = tk.Label(root, text="Hello, I am your AI assistant")
 # place the label inside the window
 label.pack()
 
-# create the chat area where messages will show
-chat = tk.Text(root, height=12, width=70)
+# create the chat area where messages will show, breaking lines at word ends
+chat = tk.Text(root, height=12, width=70, wrap="word")
 
-# place the chat area in the window
-chat.pack()
+# place the chat area in the window and let it stretch with the window
+chat.pack(fill="both", expand=True)
 
 # lock the chat area so I cannot type in it by mistake
 chat.config(state="disabled")
