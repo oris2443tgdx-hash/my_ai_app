@@ -12,8 +12,14 @@ import threading
 OLLAMA_URL = "http://localhost:11434/api/chat"
 MODEL = "llama3.2:1b"
 
-# this list remembers the whole conversation
-history = []
+# the name of my bot
+BOT_NAME = "Oris"
+
+# the hidden instruction that tells the model who it is and how to treat spelling mistakes
+SYSTEM_PROMPT = "Your name is " + BOT_NAME + ". You are a friendly, helpful AI assistant. The user may make spelling or grammar mistakes. Always work out what they meant and answer that. Do not point out their mistakes unless they ask. If a message is truly unclear, ask one short question."
+
+# this list remembers the whole conversation, starting with the hidden instruction
+history = [{"role": "system", "content": SYSTEM_PROMPT}]
 
 # this function sends the whole conversation to Ollama and returns its answer
 def ask_ollama(messages):
@@ -28,27 +34,42 @@ def ask_ollama(messages):
 root = tk.Tk()
 
 # set the text at the top of the window
-root.title("My AI App")
+root.title(BOT_NAME + " - AI Assistant")
 
 # set the window size: 600 wide, 400 tall
 root.geometry("600x400")
 
 # create the text label
-label = tk.Label(root, text="Hello, I am your AI assistant")
+label = tk.Label(root, text="Hello, I am " + BOT_NAME + ", your AI assistant")
 
 # place the label inside the window
 label.pack()
 
-# create the chat area where messages will show, breaking lines at word ends
-chat = tk.Text(root, height=12, width=70, wrap="word")
+# create a frame, an invisible box that holds the chat area and its scrollbar
+chat_frame = tk.Frame(root)
 
-# place the chat area in the window and let it stretch with the window
-chat.pack(fill="both", expand=True)
+# place the frame in the window and let it stretch with the window
+chat_frame.pack(fill="both", expand=True)
+
+# create the scrollbar inside the frame
+scrollbar = tk.Scrollbar(chat_frame)
+
+# place the scrollbar on the right side of the frame
+scrollbar.pack(side="right", fill="y")
+
+# create the chat area inside the frame and connect it to the scrollbar
+chat = tk.Text(chat_frame, height=12, width=70, wrap="word", yscrollcommand=scrollbar.set)
+
+# place the chat area on the left side of the frame
+chat.pack(side="left", fill="both", expand=True)
+
+# connect the scrollbar back to the chat area
+scrollbar.config(command=chat.yview)
 
 # lock the chat area so I cannot type in it by mistake
 chat.config(state="disabled")
 
-# create the text box where I type my message
+# create the text box where the user types a message
 entry = tk.Entry(root, width=50)
 
 # place the text box in the window
@@ -64,15 +85,15 @@ def get_answer():
         reply = "Sorry, I could not get an answer. Is Ollama running? (" + str(error) + ")"
     root.after(0, show_reply, reply)
 
-# this function shows the AI's answer in the chat area
+# this function shows the bot's answer in the chat area
 def show_reply(reply):
     chat.config(state="normal")
-    chat.insert(tk.END, "AI: " + reply + "\n\n")
+    chat.insert(tk.END, BOT_NAME + ": " + reply + "\n\n")
     chat.see(tk.END)
     chat.config(state="disabled")
     button.config(state="normal", text="Send")
 
-# this function runs when I click Send or press Enter
+# this function runs when the user clicks Send or presses Enter
 def send_message(event=None):
     if button["state"] == "disabled":
         return
@@ -84,7 +105,7 @@ def send_message(event=None):
     chat.insert(tk.END, "You: " + text + "\n")
     chat.config(state="disabled")
     entry.delete(0, tk.END)
-    button.config(state="disabled", text="Thinking...")
+    button.config(state="disabled", text=BOT_NAME + " is replying...")
     threading.Thread(target=get_answer, daemon=True).start()
 
 # pressing the Enter key also runs the function
@@ -96,5 +117,5 @@ button = tk.Button(root, text="Send", command=send_message)
 # place the button in the window
 button.pack()
 
-# keep the window open and waiting for me
+# keep the window open and waiting for the user
 root.mainloop()
