@@ -12,9 +12,12 @@ import threading
 OLLAMA_URL = "http://localhost:11434/api/chat"
 MODEL = "llama3.2:1b"
 
-# this function sends a question to Ollama and returns its answer
-def ask_ollama(question):
-    body = {"model": MODEL, "messages": [{"role": "user", "content": question}], "stream": False}
+# this list remembers the whole conversation
+history = []
+
+# this function sends the whole conversation to Ollama and returns its answer
+def ask_ollama(messages):
+    body = {"model": MODEL, "messages": messages, "stream": False}
     data = json.dumps(body).encode("utf-8")
     request = urllib.request.Request(OLLAMA_URL, data=data, headers={"Content-Type": "application/json"})
     with urllib.request.urlopen(request) as response:
@@ -52,10 +55,12 @@ entry = tk.Entry(root, width=50)
 entry.pack()
 
 # this function runs in the second thread and waits for the AI
-def get_answer(text):
+def get_answer():
     try:
-        reply = ask_ollama(text)
+        reply = ask_ollama(history)
+        history.append({"role": "assistant", "content": reply})
     except Exception as error:
+        history.pop()
         reply = "Sorry, I could not get an answer. Is Ollama running? (" + str(error) + ")"
     root.after(0, show_reply, reply)
 
@@ -69,15 +74,18 @@ def show_reply(reply):
 
 # this function runs when I click Send or press Enter
 def send_message(event=None):
+    if button["state"] == "disabled":
+        return
     text = entry.get().strip()
     if text == "":
         return
+    history.append({"role": "user", "content": text})
     chat.config(state="normal")
     chat.insert(tk.END, "You: " + text + "\n")
     chat.config(state="disabled")
     entry.delete(0, tk.END)
     button.config(state="disabled", text="Thinking...")
-    threading.Thread(target=get_answer, args=(text,), daemon=True).start()
+    threading.Thread(target=get_answer, daemon=True).start()
 
 # pressing the Enter key also runs the function
 entry.bind("<Return>", send_message)
