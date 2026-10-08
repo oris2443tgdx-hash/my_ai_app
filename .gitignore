@@ -1,0 +1,12 @@
+# python leftovers
+__pycache__/
+*.pyc
+
+# helper and scratch files I do not want online
+setkey.py
+py
+reasoning.py
+
+# private files that must never be uploaded
+.env
+preferences.json
