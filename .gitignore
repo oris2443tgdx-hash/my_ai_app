@@ -6,6 +6,7 @@ __pycache__/
 setkey.py
 py
 reasoning.py
+app_backup*.py
 
 # private files that must never be uploaded
 .env
