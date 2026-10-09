@@ -8,12 +8,21 @@ import urllib.request
 # bring in the tool for running work in a second thread
 import threading
 
+# bring in the tool for reading today's date
+import datetime
+
 # the address of Ollama on my PC, and the model I have installed
 OLLAMA_URL = "http://localhost:11434/api/chat"
 MODEL = "llama3.2:1b"
 
 # the name of my bot
 BOT_NAME = "Oris"
+
+# today's date written in words, for example Friday, 09 October 2026
+TODAY = datetime.date.today().strftime("%A, %d %B %Y")
+
+# the note shown at the bottom of the window about privacy
+PRIVACY_NOTE = "Privacy: Ollama runs on this PC, so your messages stay on this PC."
 
 # the rules that shape how the bot talks; the user never sees them
 RULES = [
@@ -26,8 +35,8 @@ RULES = [
     "If you cannot help, say so kindly in one sentence and suggest what you can do.",
 ]
 
-# build the hidden instruction from the name and the rules
-SYSTEM_PROMPT = "Your name is " + BOT_NAME + ". You are a friendly, helpful AI assistant. Follow these rules: " + " ".join(RULES)
+# build the hidden instruction from the name, the date and the rules
+SYSTEM_PROMPT = "Your name is " + BOT_NAME + ". Today's date is " + TODAY + ". You are a friendly, helpful AI assistant. Follow these rules: " + " ".join(RULES)
 
 # example conversations that show Oris how to behave; the user never sees them
 EXAMPLES = [
@@ -39,8 +48,11 @@ EXAMPLES = [
     {"role": "assistant", "content": "I do not know. That tournament has not happened yet."},
 ]
 
-# this list remembers the whole conversation, starting with the hidden instruction and the examples
-history = [{"role": "system", "content": SYSTEM_PROMPT}] + EXAMPLES
+# the messages every new chat starts with
+STARTING_MESSAGES = [{"role": "system", "content": SYSTEM_PROMPT}] + EXAMPLES
+
+# this list remembers the whole conversation; it starts as a copy of the starting messages
+history = list(STARTING_MESSAGES)
 
 # this function sends the whole conversation to Ollama and returns its answer
 def ask_ollama(messages):
@@ -57,8 +69,8 @@ root = tk.Tk()
 # set the text at the top of the window
 root.title(BOT_NAME + " - AI Assistant")
 
-# set the window size: 600 wide, 400 tall
-root.geometry("600x400")
+# set the window size: 600 wide, 500 tall
+root.geometry("600x500")
 
 # create the text label
 label = tk.Label(root, text="Hello, I am " + BOT_NAME + ", your AI assistant")
@@ -129,6 +141,16 @@ def send_message(event=None):
     button.config(state="disabled", text=BOT_NAME + " is replying...")
     threading.Thread(target=get_answer, daemon=True).start()
 
+# this function clears the chat and the memory, so a new conversation can start
+def clear_chat():
+    if button["state"] == "disabled":
+        return
+    history.clear()
+    history.extend(STARTING_MESSAGES)
+    chat.config(state="normal")
+    chat.delete("1.0", tk.END)
+    chat.config(state="disabled")
+
 # pressing the Enter key also runs the function
 entry.bind("<Return>", send_message)
 
@@ -137,6 +159,18 @@ button = tk.Button(root, text="Send", command=send_message)
 
 # place the button in the window
 button.pack()
+
+# create the Clear chat button and connect it to its function
+clear_button = tk.Button(root, text="Clear chat", command=clear_chat)
+
+# place the Clear chat button in the window
+clear_button.pack()
+
+# create the privacy label in gray
+privacy = tk.Label(root, text=PRIVACY_NOTE, fg="gray")
+
+# place the privacy label at the bottom of the window
+privacy.pack()
 
 # keep the window open and waiting for the user
 root.mainloop()
